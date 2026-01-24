@@ -1,9 +1,12 @@
-import { useEffect, useId, useSyncExternalStore, useRef } from 'react';
+import { useEffect, useId, useSyncExternalStore, useRef, useMemo } from 'react';
 import { DialStore, DialConfig, DialValue, ResolvedValues, SpringConfig } from '../store/DialStore';
 
 export interface UseDialOptions {
   onAction?: (action: string) => void;
 }
+
+// Stable empty object for server snapshot to avoid infinite loop in React 19
+const EMPTY_SERVER_SNAPSHOT: Record<string, DialValue> = {};
 
 export function useDialKit<T extends DialConfig>(
   name: string,
@@ -29,11 +32,11 @@ export function useDialKit<T extends DialConfig>(
     });
   }, [panelId]);
 
-  // Subscribe to changes
+  // Subscribe to changes - use stable empty object for server snapshot
   const values = useSyncExternalStore(
     (callback) => DialStore.subscribe(panelId, callback),
     () => DialStore.getValues(panelId),
-    () => DialStore.getValues(panelId)
+    () => EMPTY_SERVER_SNAPSHOT
   );
 
   // Build resolved values object
