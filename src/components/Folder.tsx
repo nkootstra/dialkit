@@ -1,4 +1,4 @@
-import { useState, useRef, ReactNode } from 'react';
+import { useState, useRef, useEffect, ReactNode } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 
 interface FolderProps {
@@ -12,21 +12,57 @@ interface FolderProps {
 
 export function Folder({ title, children, defaultOpen = true, isRoot = false, onOpenChange, toolbar }: FolderProps) {
   const [isOpen, setIsOpen] = useState(defaultOpen);
-  const toolbarRef = useRef<HTMLDivElement>(null);
+  const [isCollapsed, setIsCollapsed] = useState(!defaultOpen);
+  const contentRef = useRef<HTMLDivElement>(null);
+  const [contentHeight, setContentHeight] = useState<number | undefined>(undefined);
 
   const iconTransition = { type: 'spring' as const, visualDuration: 0.4, bounce: 0.1 };
+  const panelTransition = { type: 'spring' as const, visualDuration: 0.4, bounce: 0.2 };
+
+  // Track content height for explicit panel sizing (no height: 'auto')
+  useEffect(() => {
+    const el = contentRef.current;
+    if (!el) return;
+    const ro = new ResizeObserver(() => {
+      // Only update while open — freeze height when closing so it doesn't shrink mid-animation
+      if (isOpen) {
+        const h = el.offsetHeight;
+        setContentHeight(prev => prev === h ? prev : h);
+      }
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [isOpen]);
 
   const folderContent = (
-    <div className={`dialkit-folder ${isRoot ? 'dialkit-folder-root' : ''}`}>
-      <div className={`dialkit-folder-header ${isRoot ? 'dialkit-panel-header' : ''}`} onClick={() => { const next = !isOpen; setIsOpen(next); onOpenChange?.(next); }}>
+    <div ref={isRoot ? contentRef : undefined} className={`dialkit-folder ${isRoot ? 'dialkit-folder-root' : ''}`}>
+      <div className={`dialkit-folder-header ${isRoot ? 'dialkit-panel-header' : ''}`} onClick={() => { const next = !isOpen; setIsOpen(next); if (next) setIsCollapsed(false); onOpenChange?.(next); }}>
         <div className="dialkit-folder-header-top">
-          <div className="dialkit-folder-title-row">
-            <span className={`dialkit-folder-title ${isRoot ? 'dialkit-folder-title-root' : ''}`}>
-              {title}
-            </span>
-          </div>
           {isRoot ? (
-            // Root panel uses sliders icon
+            <AnimatePresence initial={false} mode="popLayout">
+              {isOpen && (
+                <motion.div
+                  className="dialkit-folder-title-row"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.15 }}
+                >
+                  <span className="dialkit-folder-title dialkit-folder-title-root">
+                    {title}
+                  </span>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          ) : (
+            <div className="dialkit-folder-title-row">
+              <span className="dialkit-folder-title">
+                {title}
+              </span>
+            </div>
+          )}
+          {isRoot ? (
+            // Root panel icon — fixed position, container morphs around it
             <svg
               className="dialkit-panel-icon"
               viewBox="0 0 16 16"
@@ -60,24 +96,10 @@ export function Folder({ title, children, defaultOpen = true, isRoot = false, on
           <AnimatePresence initial={false}>
             {isOpen && (
               <motion.div
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: 'auto', opacity: 1 }}
-                exit={{ height: 0, opacity: 0 }}
-                transition={{ type: 'spring', visualDuration: 0.25, bounce: 0 }}
-                style={{ overflow: 'clip', willChange: 'transform' }}
-                onAnimationComplete={(def) => {
-                  if ((def as { opacity?: number }).opacity === 1) {
-                    const el = toolbarRef.current;
-                    if (el) el.style.overflow = 'visible';
-                  }
-                }}
-                onAnimationStart={(def) => {
-                  if ((def as { opacity?: number }).opacity === 0) {
-                    const el = toolbarRef.current;
-                    if (el) el.style.overflow = 'clip';
-                  }
-                }}
-                ref={toolbarRef}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.15 }}
               >
                 <div className="dialkit-panel-toolbar" onClick={(e) => e.stopPropagation()}>
                   {toolbar}
@@ -92,10 +114,10 @@ export function Folder({ title, children, defaultOpen = true, isRoot = false, on
         {isOpen && (
           <motion.div
             className="dialkit-folder-content"
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ type: 'spring', visualDuration: 0.25, bounce: 0 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.15 }}
           >
             <div className="dialkit-folder-inner">{children}</div>
           </motion.div>
@@ -111,13 +133,18 @@ export function Folder({ title, children, defaultOpen = true, isRoot = false, on
         className="dialkit-panel-inner"
         initial={false}
         animate={{
-          width: isOpen ? 280 : 160,
+          width: isOpen ? 280 : 42,
+          height: isOpen ? (contentHeight !== undefined ? contentHeight + 24 : 'auto') : 42,
+          borderRadius: isOpen ? 14 : 21,
           boxShadow: isOpen
             ? '0 8px 32px rgba(0, 0, 0, 0.5)'
             : '0 4px 16px rgba(0, 0, 0, 0.25)',
         }}
-        transition={{ type: 'spring', visualDuration: 0.4, bounce: 0.05 }}
-        data-collapsed={!isOpen}
+        transition={panelTransition}
+        style={{ overflow: isOpen ? undefined : 'hidden', cursor: isOpen ? undefined : 'pointer' }}
+        onClick={!isOpen ? () => { setIsOpen(true); setIsCollapsed(false); onOpenChange?.(true); } : undefined}
+        onAnimationComplete={() => { if (!isOpen) setIsCollapsed(true); }}
+        data-collapsed={isCollapsed}
       >
         {folderContent}
       </motion.div>

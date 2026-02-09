@@ -57,7 +57,7 @@ export function ColorControl({ label, value, onChange }: ColorControlProps) {
             className="dialkit-color-hex"
             onClick={() => setIsEditing(true)}
           >
-            {value.toUpperCase()}
+            {(value ?? '').toUpperCase()}
           </span>
         )}
         <button

@@ -52,10 +52,24 @@
 }
 
 
+.dialkit-panel-inner[data-collapsed="true"] {
+  border-radius: 50%;
+  padding: 12px;
+}
+
 .dialkit-panel-inner[data-collapsed="true"] .dialkit-panel-header {
   padding-bottom: 0;
   margin-bottom: 0;
   border-bottom: none;
+}
+
+.dialkit-panel-inner[data-collapsed="true"] .dialkit-folder-title-row {
+  display: none;
+}
+
+.dialkit-panel-inner[data-collapsed="true"] .dialkit-folder-header-top {
+  justify-content: center;
+  padding: 0;
 }
 
 .dialkit-panel-inner::-webkit-scrollbar {
@@ -145,6 +159,7 @@
   display: flex;
   align-items: center;
   gap: 6px;
+  flex: 1;
   white-space: nowrap;
   overflow: hidden;
 }
@@ -178,10 +193,13 @@
 }
 
 .dialkit-panel-icon {
+  position: absolute;
+  top: 12px;
+  right: 12px;
   width: 16px;
   height: 16px;
   color: #fff;
-  flex-shrink: 0;
+  z-index: 1;
 }
 
 .dialkit-folder-content {
@@ -864,16 +882,12 @@
 
 
 .dialkit-preset-dropdown {
-  position: absolute;
-  top: calc(100% + 4px);
-  left: 0;
-  min-width: 100%;
   width: max-content;
   background: #2a2a2a;
   border: 1px solid var(--dial-border);
   border-radius: var(--dial-radius);
   padding: 4px;
-  z-index: 100;
+  z-index: 10000;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
 }
 
