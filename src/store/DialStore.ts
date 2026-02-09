@@ -92,6 +92,7 @@ class DialStoreClass {
   private actionListeners: Map<string, Set<ActionListener>> = new Map();
   private presets: Map<string, Preset[]> = new Map();
   private activePreset: Map<string, string | null> = new Map();
+  private baseValues: Map<string, Record<string, DialValue>> = new Map();
 
   registerPanel(id: string, name: string, config: DialConfig): void {
     const controls = this.parseConfig(config, '');
@@ -99,6 +100,7 @@ class DialStoreClass {
 
     this.panels.set(id, { id, name, controls, values });
     this.snapshots.set(id, { ...values });
+    this.baseValues.set(id, { ...values });
     this.notifyGlobal();
   }
 
@@ -114,6 +116,18 @@ class DialStoreClass {
     if (!panel) return;
 
     panel.values[path] = value;
+
+    // Auto-save to active preset or base values
+    const activeId = this.activePreset.get(panelId);
+    if (activeId) {
+      const presets = this.presets.get(panelId) ?? [];
+      const preset = presets.find(p => p.id === activeId);
+      if (preset) preset.values[path] = value;
+    } else {
+      const base = this.baseValues.get(panelId);
+      if (base) base[path] = value;
+    }
+
     // Create a new snapshot reference so useSyncExternalStore detects the change
     this.snapshots.set(panelId, { ...panel.values });
     this.notify(panelId);
@@ -249,6 +263,12 @@ class DialStoreClass {
   }
 
   clearActivePreset(panelId: string): void {
+    const panel = this.panels.get(panelId);
+    const base = this.baseValues.get(panelId);
+    if (panel && base) {
+      panel.values = { ...base };
+      this.snapshots.set(panelId, { ...panel.values });
+    }
     this.activePreset.set(panelId, null);
     this.notify(panelId);
   }
