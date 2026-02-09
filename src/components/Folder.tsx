@@ -43,7 +43,7 @@ export function Folder({ title, children, defaultOpen = true, isRoot = false, on
               {isOpen && (
                 <motion.div
                   className="dialkit-folder-title-row"
-                  initial={{ opacity: 0 }}
+                  initial={{ opacity: 1 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.15 }}
@@ -96,7 +96,7 @@ export function Folder({ title, children, defaultOpen = true, isRoot = false, on
           <AnimatePresence initial={false}>
             {isOpen && (
               <motion.div
-                initial={{ opacity: 0 }}
+                initial={{ opacity: 1 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.15 }}
@@ -114,10 +114,11 @@ export function Folder({ title, children, defaultOpen = true, isRoot = false, on
         {isOpen && (
           <motion.div
             className="dialkit-folder-content"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.15 }}
+            initial={isRoot ? { opacity: 1 } : { height: 0, opacity: 0 }}
+            animate={isRoot ? { opacity: 1 } : { height: 'auto', opacity: 1 }}
+            exit={isRoot ? { opacity: 0 } : { height: 0, opacity: 0 }}
+            transition={isRoot ? { duration: 0.15 } : { type: 'spring', visualDuration: 0.35, bounce: 0.1 }}
+            style={isRoot ? undefined : { overflow: 'hidden' }}
           >
             <div className="dialkit-folder-inner">{children}</div>
           </motion.div>
