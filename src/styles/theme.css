@@ -203,8 +203,6 @@
 }
 
 .dialkit-folder-content {
-  overflow-x: visible;
-  overflow-y: clip;
   will-change: transform;
 }
 

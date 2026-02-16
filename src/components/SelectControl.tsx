@@ -10,9 +10,13 @@ interface SelectControlProps {
   onChange: (value: string) => void;
 }
 
+function toTitleCase(s: string): string {
+  return s.replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
 function normalizeOptions(options: SelectOption[]): { value: string; label: string }[] {
   return options.map((opt) =>
-    typeof opt === 'string' ? { value: opt, label: opt } : opt
+    typeof opt === 'string' ? { value: opt, label: toTitleCase(opt) } : opt
   );
 }
 

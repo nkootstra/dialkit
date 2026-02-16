@@ -118,7 +118,7 @@ export function Folder({ title, children, defaultOpen = true, isRoot = false, on
             animate={isRoot ? { opacity: 1 } : { height: 'auto', opacity: 1 }}
             exit={isRoot ? { opacity: 0 } : { height: 0, opacity: 0 }}
             transition={isRoot ? { duration: 0.15 } : { type: 'spring', visualDuration: 0.35, bounce: 0.1 }}
-            style={isRoot ? undefined : { overflow: 'hidden' }}
+            style={isRoot ? undefined : { clipPath: 'inset(0 -20px)' }}
           >
             <div className="dialkit-folder-inner">{children}</div>
           </motion.div>
