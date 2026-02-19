@@ -72,13 +72,24 @@ Returns a fully typed object matching your config shape with live values. Updati
 
 ### Slider
 
+Numbers create sliders. There are three ways to define them:
+
+**Explicit range** — `[default, min, max]`:
 ```tsx
-blur: [24, 0, 100]      // [default, min, max] — explicit range
-blur: [24, 0, 100, 5]   // [default, min, max, step] — explicit range + step
-scale: 1.2              // auto-infers range from value
+blur: [24, 0, 100]
 ```
 
-Numbers create sliders. With a tuple `[default, min, max]` you set the range explicitly. An optional 4th param sets the step size. A bare number auto-infers a reasonable range:
+**Explicit range + step** — `[default, min, max, step]`:
+```tsx
+blur: [24, 0, 100, 5]    // snaps in increments of 5
+```
+When `step` is omitted, it's inferred from the range (see table below).
+
+**Auto-inferred** — bare number:
+```tsx
+scale: 1.2
+```
+A single number auto-infers a reasonable min, max, and step:
 
 | Value range | Inferred min/max | Step |
 |-------------|-----------------|------|
@@ -198,26 +209,25 @@ Action buttons trigger callbacks without storing any value. The `label` defaults
 
 ### Folder
 
+Any nested plain object becomes a collapsible folder. Folders can nest arbitrarily deep.
+
 ```tsx
 shadow: {
   blur: [10, 0, 50],
   opacity: [0.25, 0, 1],
   color: '#000000',
 }
-```
 
-Any nested plain object becomes a collapsible folder. Folders can nest arbitrarily deep. Access nested values with dot notation on the returned object:
-
-```tsx
+// Access nested values:
 params.shadow.blur     // number
 params.shadow.color    // string
 ```
 
-Use `_collapsed: true` to start a folder closed:
+Folders are open by default. Add `_collapsed: true` to start a folder closed. This is a reserved metadata key — it controls the UI only and won't appear in your returned values.
 
 ```tsx
 shadow: {
-  _collapsed: true,
+  _collapsed: true,    // folder starts closed
   blur: [10, 0, 50],
   opacity: [0.25, 0, 1],
 }
