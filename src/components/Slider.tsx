@@ -200,11 +200,11 @@ export function Slider({
       if (!isInteracting) return;
 
       if (isClickRef.current) {
-        // When steps are coarse (≤20 positions), click snaps to the nearest step. 
+        // When steps are coarse (≤10 positions), click snaps to the nearest step.
         // Otherwise, the original decile-magnetic behavior is preserved
         const rawValue = positionToValue(e.clientX);
         const discreteSteps = (max - min) / step;
-        const snappedValue = discreteSteps <= 20
+        const snappedValue = discreteSteps <= 10
           ? Math.max(min, Math.min(max, min + Math.round((rawValue - min) / step) * step))
           : snapToDecile(rawValue, min, max);
 
@@ -344,11 +344,10 @@ export function Slider({
     ? 'rgba(255, 255, 255, 0.15)'
     : 'rgba(255, 255, 255, 0.11)';
 
-  // The ≤ 20 threshold cleanly separates discrete sliders
-  // (like step=2 on a 0–10 range → 5 steps) from continuous ones 
-  // (like step=0.01 on 0–1 → 100 steps), keeping original behavior intact for the latter. 
+  // The ≤ 10 threshold separates discrete sliders
+  // (like step=2 on a 0–10 range → 5 steps) from continuous ones.
   const discreteSteps = (max - min) / step;
-  const hashMarks = discreteSteps <= 20
+  const hashMarks = discreteSteps <= 10
     ? Array.from({ length: discreteSteps - 1 }, (_, i) => {
         const pct = ((i + 1) * step) / (max - min) * 100;
         return (

@@ -74,10 +74,11 @@ Returns a fully typed object matching your config shape with live values. Updati
 
 ```tsx
 blur: [24, 0, 100]      // [default, min, max] — explicit range
+blur: [24, 0, 100, 5]   // [default, min, max, step] — explicit range + step
 scale: 1.2              // auto-infers range from value
 ```
 
-Numbers create sliders. With a tuple `[default, min, max]` you set the range explicitly. A bare number auto-infers a reasonable range:
+Numbers create sliders. With a tuple `[default, min, max]` you set the range explicitly. An optional 4th param sets the step size. A bare number auto-infers a reasonable range:
 
 | Value range | Inferred min/max | Step |
 |-------------|-----------------|------|
@@ -210,6 +211,16 @@ Any nested plain object becomes a collapsible folder. Folders can nest arbitrari
 ```tsx
 params.shadow.blur     // number
 params.shadow.color    // string
+```
+
+Use `_collapsed: true` to start a folder closed:
+
+```tsx
+shadow: {
+  _collapsed: true,
+  blur: [10, 0, 50],
+  opacity: [0.25, 0, 1],
+}
 ```
 
 ---

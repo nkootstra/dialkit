@@ -61,6 +61,7 @@ export type ControlMeta = {
   max?: number;
   step?: number;
   children?: ControlMeta[];
+  defaultOpen?: boolean;
   options?: (string | { value: string; label: string })[];
   placeholder?: string;
 };
@@ -285,6 +286,7 @@ class DialStoreClass {
     const controls: ControlMeta[] = [];
 
     for (const [key, value] of Object.entries(config)) {
+      if (key === '_collapsed') continue;
       const path = prefix ? `${prefix}.${key}` : key;
       const label = this.formatLabel(key);
 
@@ -323,11 +325,14 @@ class DialStoreClass {
         }
       } else if (typeof value === 'object' && value !== null) {
         // Nested object becomes a folder
+        const folderConfig = value as DialConfig;
+        const defaultOpen = '_collapsed' in folderConfig ? !(folderConfig._collapsed as boolean) : true;
         controls.push({
           type: 'folder',
           path,
           label,
-          children: this.parseConfig(value as DialConfig, path),
+          defaultOpen,
+          children: this.parseConfig(folderConfig, path),
         });
       }
     }
@@ -339,6 +344,7 @@ class DialStoreClass {
     const values: Record<string, DialValue> = {};
 
     for (const [key, value] of Object.entries(config)) {
+      if (key === '_collapsed') continue;
       const path = prefix ? `${prefix}.${key}` : key;
 
       if (Array.isArray(value) && value.length <= 4 && typeof value[0] === 'number') {

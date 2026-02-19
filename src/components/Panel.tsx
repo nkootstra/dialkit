@@ -90,7 +90,7 @@ Apply these values as the new defaults in the useDialKit call.`;
 
       case 'folder':
         return (
-          <Folder key={control.path} title={control.label}>
+          <Folder key={control.path} title={control.label} defaultOpen={control.defaultOpen ?? true}>
             {control.children?.map(renderControl)}
           </Folder>
         );
