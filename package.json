@@ -1,7 +1,7 @@
 {
   "name": "dialkit",
   "version": "0.2.2",
-  "description": "Real-time parameter tweaking for React apps",
+  "description": "Real-time parameter tweaking for React and Solid apps",
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
@@ -17,6 +17,16 @@
         "default": "./dist/index.cjs"
       }
     },
+    "./solid": {
+      "import": {
+        "types": "./dist/solid/index.d.ts",
+        "default": "./dist/solid/index.js"
+      },
+      "require": {
+        "types": "./dist/solid/index.d.cts",
+        "default": "./dist/solid/index.cjs"
+      }
+    },
     "./styles.css": "./dist/styles.css"
   },
   "files": [
@@ -25,36 +35,48 @@
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.solid.json"
   },
   "peerDependencies": {
     "motion": ">=11.0.0",
     "react": ">=18.0.0",
-    "react-dom": ">=18.0.0"
+    "react-dom": ">=18.0.0",
+    "solid-js": ">=1.6.0"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    },
+    "react-dom": {
+      "optional": true
+    },
+    "solid-js": {
+      "optional": true
+    }
   },
   "devDependencies": {
     "@types/react": "^18.2.0",
     "@types/react-dom": "^18.2.0",
+    "esbuild-plugin-solid": "^0.6.0",
     "motion": "^12.0.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "solid-js": "^1.9.0",
     "tsup": "^8.0.0",
     "typescript": "^5.3.0"
   },
   "keywords": [
     "react",
+    "solid",
+    "solidjs",
     "animation",
     "tweaking",
     "parameters",
-    "devtools",
-    "framer-motion"
+    "devtools"
   ],
   "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/joshpuckett/dialkit"
-  },
-  "dependencies": {
-    "dialkit": "^0.1.1"
   }
 }
