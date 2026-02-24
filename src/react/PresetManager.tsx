@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'motion/react';
-import { DialStore, Preset } from '../store/DialStore';
+import { DialStore } from '../core';
+import type { Preset } from '../core';
 
 interface PresetManagerProps {
   panelId: string;

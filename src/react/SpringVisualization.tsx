@@ -1,62 +1,16 @@
-import { SpringConfig } from '../store/DialStore';
+import { generateSpringCurve, resolveSpringPhysics } from '../core';
+import type { SpringConfig } from '../core';
 
 interface SpringVisualizationProps {
   spring: SpringConfig;
   isSimpleMode: boolean;
 }
 
-function generateSpringCurve(
-  stiffness: number,
-  damping: number,
-  mass: number,
-  duration: number
-): [number, number][] {
-  const points: [number, number][] = [];
-  const steps = 100;
-  const dt = duration / steps;
-
-  let position = 0;
-  let velocity = 0;
-  const target = 1;
-
-  for (let i = 0; i <= steps; i++) {
-    const time = i * dt;
-    points.push([time, position]);
-
-    const springForce = -stiffness * (position - target);
-    const dampingForce = -damping * velocity;
-    const acceleration = (springForce + dampingForce) / mass;
-
-    velocity += acceleration * dt;
-    position += velocity * dt;
-  }
-
-  return points;
-}
-
 export function SpringVisualization({ spring, isSimpleMode }: SpringVisualizationProps) {
   const width = 256;
   const height = 140;
 
-  let stiffness: number;
-  let damping: number;
-  let mass: number;
-
-  if (isSimpleMode) {
-    const visualDuration = spring.visualDuration ?? 0.3;
-    const bounce = spring.bounce ?? 0.2;
-    mass = 1;
-
-    stiffness = (2 * Math.PI) / visualDuration;
-    stiffness = Math.pow(stiffness, 2);
-
-    const dampingRatio = 1 - bounce;
-    damping = 2 * dampingRatio * Math.sqrt(stiffness * mass);
-  } else {
-    stiffness = spring.stiffness ?? 400;
-    damping = spring.damping ?? 17;
-    mass = spring.mass ?? 1;
-  }
+  const { stiffness, damping, mass } = resolveSpringPhysics(spring, isSimpleMode);
 
   const duration = 2;
   const points = generateSpringCurve(stiffness, damping, mass, duration);

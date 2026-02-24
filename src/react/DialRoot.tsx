@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { DialStore, PanelConfig } from '../store/DialStore';
+import { DialStore } from '../core';
+import type { PanelConfig } from '../core';
 import { Panel } from './Panel';
 
 export type DialPosition = 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left';

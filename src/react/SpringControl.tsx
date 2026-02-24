@@ -1,9 +1,10 @@
-import { SpringConfig, DialStore } from '../store/DialStore';
+import { useSyncExternalStore } from 'react';
+import { DialStore } from '../core';
+import type { SpringConfig } from '../core';
 import { Folder } from './Folder';
 import { Slider } from './Slider';
 import { SegmentedControl } from './SegmentedControl';
 import { SpringVisualization } from './SpringVisualization';
-import { useSyncExternalStore } from 'react';
 
 interface SpringControlProps {
   panelId: string;

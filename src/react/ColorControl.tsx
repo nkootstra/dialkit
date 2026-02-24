@@ -1,12 +1,11 @@
 import { useState, useRef, useEffect } from 'react';
+import { expandShorthandHex, isHexColor } from '../core';
 
 interface ColorControlProps {
   label: string;
   value: string;
   onChange: (value: string) => void;
 }
-
-const HEX_COLOR_REGEX = /^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6}|[0-9A-Fa-f]{8})$/;
 
 export function ColorControl({ label, value, onChange }: ColorControlProps) {
   const [isEditing, setIsEditing] = useState(false);
@@ -22,7 +21,7 @@ export function ColorControl({ label, value, onChange }: ColorControlProps) {
 
   function handleTextSubmit() {
     setIsEditing(false);
-    if (HEX_COLOR_REGEX.test(editValue)) {
+    if (isHexColor(editValue)) {
       onChange(editValue);
     } else {
       setEditValue(value);
@@ -76,9 +75,4 @@ export function ColorControl({ label, value, onChange }: ColorControlProps) {
       </div>
     </div>
   );
-}
-
-function expandShorthandHex(hex: string): string {
-  if (hex.length !== 4) return hex;
-  return `#${hex[1]}${hex[1]}${hex[2]}${hex[2]}${hex[3]}${hex[3]}`;
 }

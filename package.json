@@ -1,7 +1,7 @@
 {
   "name": "dialkit",
-  "version": "0.2.2",
-  "description": "Real-time parameter tweaking for React apps",
+  "version": "0.3.0",
+  "description": "Framework-agnostic real-time parameter tweaking — works with React, Svelte, Vue, and vanilla JS",
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
@@ -15,6 +15,36 @@
       "require": {
         "types": "./dist/index.d.cts",
         "default": "./dist/index.cjs"
+      }
+    },
+    "./core": {
+      "import": {
+        "types": "./dist/core/index.d.ts",
+        "default": "./dist/core/index.js"
+      },
+      "require": {
+        "types": "./dist/core/index.d.cts",
+        "default": "./dist/core/index.cjs"
+      }
+    },
+    "./react": {
+      "import": {
+        "types": "./dist/react/index.d.ts",
+        "default": "./dist/react/index.js"
+      },
+      "require": {
+        "types": "./dist/react/index.d.cts",
+        "default": "./dist/react/index.cjs"
+      }
+    },
+    "./vanilla": {
+      "import": {
+        "types": "./dist/vanilla/index.d.ts",
+        "default": "./dist/vanilla/index.js"
+      },
+      "require": {
+        "types": "./dist/vanilla/index.d.cts",
+        "default": "./dist/vanilla/index.cjs"
       }
     },
     "./styles.css": "./dist/styles.css"
@@ -32,6 +62,17 @@
     "react": ">=18.0.0",
     "react-dom": ">=18.0.0"
   },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    },
+    "react-dom": {
+      "optional": true
+    },
+    "motion": {
+      "optional": true
+    }
+  },
   "devDependencies": {
     "@types/react": "^18.2.0",
     "@types/react-dom": "^18.2.0",
@@ -43,6 +84,10 @@
   },
   "keywords": [
     "react",
+    "svelte",
+    "vue",
+    "vanilla",
+    "framework-agnostic",
     "animation",
     "tweaking",
     "parameters",

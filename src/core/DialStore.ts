@@ -1,86 +1,22 @@
 // Lightweight state store with subscriptions for dialkit
+// Pure JavaScript — no framework dependencies
 
-export type SpringConfig = {
-  type: 'spring';
-  stiffness?: number;
-  damping?: number;
-  mass?: number;
-  visualDuration?: number;
-  bounce?: number;
-};
-
-export type ActionConfig = {
-  type: 'action';
-  label?: string;
-};
-
-export type SelectConfig = {
-  type: 'select';
-  options: (string | { value: string; label: string })[];
-  default?: string;
-};
-
-export type ColorConfig = {
-  type: 'color';
-  default?: string;
-};
-
-export type TextConfig = {
-  type: 'text';
-  default?: string;
-  placeholder?: string;
-};
-
-export type DialValue = number | boolean | string | SpringConfig | ActionConfig | SelectConfig | ColorConfig | TextConfig;
-
-export type DialConfig = {
-  [key: string]: DialValue | [number, number, number, number?] | DialConfig;
-};
-
-export type ResolvedValues<T extends DialConfig> = {
-  [K in keyof T]: T[K] extends [number, number, number, number?]
-    ? number
-    : T[K] extends SpringConfig
-      ? SpringConfig
-      : T[K] extends SelectConfig
-        ? string
-        : T[K] extends ColorConfig
-          ? string
-          : T[K] extends TextConfig
-            ? string
-            : T[K] extends DialConfig
-              ? ResolvedValues<T[K]>
-              : T[K];
-};
-
-export type ControlMeta = {
-  type: 'slider' | 'toggle' | 'spring' | 'folder' | 'action' | 'select' | 'color' | 'text';
-  path: string;
-  label: string;
-  min?: number;
-  max?: number;
-  step?: number;
-  children?: ControlMeta[];
-  defaultOpen?: boolean;
-  options?: (string | { value: string; label: string })[];
-  placeholder?: string;
-};
-
-export type PanelConfig = {
-  id: string;
-  name: string;
-  controls: ControlMeta[];
-  values: Record<string, DialValue>;
-};
+import type {
+  DialConfig,
+  DialValue,
+  ControlMeta,
+  PanelConfig,
+  Preset,
+  SpringConfig,
+  ActionConfig,
+  SelectConfig,
+  ColorConfig,
+  TextConfig,
+} from './types';
+import { isHexColor } from './utils';
 
 type Listener = () => void;
 type ActionListener = (action: string) => void;
-
-export type Preset = {
-  id: string;
-  name: string;
-  values: Record<string, DialValue>;
-};
 
 // Stable empty object for unregistered panels (React 19 useSyncExternalStore requirement)
 const EMPTY_VALUES: Record<string, DialValue> = Object.freeze({});
@@ -282,7 +218,7 @@ class DialStoreClass {
     this.globalListeners.forEach(fn => fn());
   }
 
-  private parseConfig(config: DialConfig, prefix: string): ControlMeta[] {
+  parseConfig(config: DialConfig, prefix: string): ControlMeta[] {
     const controls: ControlMeta[] = [];
 
     for (const [key, value] of Object.entries(config)) {
@@ -318,7 +254,7 @@ class DialStoreClass {
         controls.push({ type: 'text', path, label, placeholder: value.placeholder });
       } else if (typeof value === 'string') {
         // Auto-detect: hex color vs text
-        if (this.isHexColor(value)) {
+        if (isHexColor(value)) {
           controls.push({ type: 'color', path, label });
         } else {
           controls.push({ type: 'text', path, label });
@@ -340,7 +276,7 @@ class DialStoreClass {
     return controls;
   }
 
-  private flattenValues(config: DialConfig, prefix: string): Record<string, DialValue> {
+  flattenValues(config: DialConfig, prefix: string): Record<string, DialValue> {
     const values: Record<string, DialValue> = {};
 
     for (const [key, value] of Object.entries(config)) {
@@ -418,10 +354,6 @@ class DialStoreClass {
       'type' in value &&
       (value as TextConfig).type === 'text'
     );
-  }
-
-  private isHexColor(value: string): boolean {
-    return /^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6}|[0-9A-Fa-f]{8})$/.test(value);
   }
 
   private formatLabel(key: string): string {

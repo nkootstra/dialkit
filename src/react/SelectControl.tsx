@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'motion/react';
+import { normalizeSelectOptions } from '../core';
 
 type SelectOption = string | { value: string; label: string };
 
@@ -11,23 +12,13 @@ interface SelectControlProps {
   onChange: (value: string) => void;
 }
 
-function toTitleCase(s: string): string {
-  return s.replace(/\b\w/g, (c) => c.toUpperCase());
-}
-
-function normalizeOptions(options: SelectOption[]): { value: string; label: string }[] {
-  return options.map((opt) =>
-    typeof opt === 'string' ? { value: opt, label: toTitleCase(opt) } : opt
-  );
-}
-
 export function SelectControl({ label, value, options, onChange }: SelectControlProps) {
   const [isOpen, setIsOpen] = useState(false);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const [portalTarget, setPortalTarget] = useState<HTMLElement | null>(null);
   const [pos, setPos] = useState<{ top: number; left: number; width: number; above: boolean } | null>(null);
-  const normalized = normalizeOptions(options);
+  const normalized = normalizeSelectOptions(options);
   const selectedOption = normalized.find((o) => o.value === value);
 
   const updatePos = useCallback(() => {

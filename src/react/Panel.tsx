@@ -1,6 +1,7 @@
 import { useState, useSyncExternalStore } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { DialStore, ControlMeta, PanelConfig, SpringConfig } from '../store/DialStore';
+import { DialStore } from '../core';
+import type { ControlMeta, PanelConfig, SpringConfig } from '../core';
 import { Folder } from './Folder';
 import { Slider } from './Slider';
 import { Toggle } from './Toggle';
