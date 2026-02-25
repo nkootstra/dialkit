@@ -233,6 +233,8 @@ shadow: {
 }
 ```
 
+DialKit also supports dynamic config updates. If your config shape, defaults, options, or labels change over time, the panel updates while preserving current values where paths still exist.
+
 ---
 
 ## DialRoot
