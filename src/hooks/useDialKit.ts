@@ -12,18 +12,26 @@ export function useDialKit<T extends DialConfig>(
 ): ResolvedValues<T> {
   const instanceId = useId();
   const panelId = `${name}-${instanceId}`;
+  const configRef = useRef(config);
+  const nameRef = useRef(name);
   const onActionRef = useRef(options?.onAction);
   onActionRef.current = options?.onAction;
 
   // Register panel on mount
   useEffect(() => {
-    DialStore.registerPanel(panelId, name, config);
+    DialStore.registerPanel(panelId, nameRef.current, configRef.current);
     return () => DialStore.unregisterPanel(panelId);
   }, [panelId]);
 
-  // Keep panel metadata and controls in sync with config/name changes.
+  // Update only when callers intentionally pass a new config reference (or rename panel).
   useEffect(() => {
+    if (configRef.current === config && nameRef.current === name) {
+      return;
+    }
+
     DialStore.updatePanel(panelId, name, config);
+    configRef.current = config;
+    nameRef.current = name;
   }, [panelId, name, config]);
 
   // Subscribe to action events
