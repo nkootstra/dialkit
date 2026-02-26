@@ -1,17 +1,38 @@
 import { defineConfig } from 'tsup';
+import { solidPlugin } from 'esbuild-plugin-solid';
 
-export default defineConfig({
-  entry: ['src/index.ts'],
-  format: ['esm', 'cjs'],
-  dts: true,
-  splitting: false,
-  sourcemap: true,
-  clean: true,
-  external: ['react', 'react-dom', 'motion'],
-  esbuildOptions(options) {
-    options.banner = {
-      js: '"use client";',
-    };
+export default defineConfig([
+  // React build
+  {
+    entry: ['src/index.ts'],
+    format: ['esm', 'cjs'],
+    dts: true,
+    splitting: false,
+    sourcemap: true,
+    clean: true,
+    external: ['react', 'react-dom', 'motion'],
+    esbuildOptions(options) {
+      options.banner = {
+        js: '"use client";',
+      };
+    },
+    onSuccess: 'cp src/styles/theme.css dist/styles.css',
   },
-  onSuccess: 'cp src/styles/theme.css dist/styles.css',
-});
+  // Solid build
+  {
+    entry: { index: 'src/solid/index.ts' },
+    outDir: 'dist/solid',
+    format: ['esm', 'cjs'],
+    dts: {
+      compilerOptions: {
+        jsx: 'preserve',
+        jsxImportSource: 'solid-js',
+      },
+    },
+    splitting: false,
+    sourcemap: true,
+    external: ['solid-js', 'solid-js/web', 'motion'],
+    tsconfig: 'tsconfig.solid.json',
+    esbuildPlugins: [solidPlugin()],
+  },
+]);
