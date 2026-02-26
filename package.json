@@ -1,6 +1,6 @@
 {
   "name": "dialkit",
-  "version": "0.2.2",
+  "version": "1.0.0",
   "description": "Real-time parameter tweaking for React and Solid apps",
   "type": "module",
   "main": "./dist/index.cjs",
