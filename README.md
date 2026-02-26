@@ -255,6 +255,7 @@ const values = useDialKit('Controls', {
 | Prop | Type | Default |
 |------|------|---------|
 | `position` | `'top-right' \| 'top-left' \| 'bottom-right' \| 'bottom-left'` | `'top-right'` |
+| `defaultOpen` | `boolean` | `true` |
 
 Mount once at your app root. The panel renders via a portal on `document.body`. It collapses to a small icon button and expands to 280px wide on click.
 
