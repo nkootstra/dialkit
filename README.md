@@ -1,6 +1,6 @@
 # dialkit
 
-Real-time parameter tweaking for React + Motion.
+Real-time parameter tweaking for React and Solid.
 
 ## Quick Start
 
@@ -325,6 +325,58 @@ function PhotoStack() {
   );
 }
 ```
+
+---
+
+## Solid
+
+DialKit also works with Solid. Import from `dialkit/solid` instead of `dialkit` — the API mirrors the React version, with `createDialKit` replacing `useDialKit` and `DialRoot` as a Solid component.
+
+```bash
+npm install dialkit solid-js
+```
+
+```tsx
+// App.tsx
+import { DialRoot } from 'dialkit/solid';
+import 'dialkit/styles.css';
+
+export default function App() {
+  return (
+    <>
+      <MyComponent />
+      <DialRoot />
+    </>
+  );
+}
+```
+
+```tsx
+// component.tsx
+import { createDialKit } from 'dialkit/solid';
+
+function Card() {
+  const params = createDialKit('Card', {
+    blur: [24, 0, 100],
+    scale: 1.2,
+    color: '#ff5500',
+    visible: true,
+  });
+
+  return (
+    <div style={{
+      filter: `blur(${params().blur}px)`,
+      transform: `scale(${params().scale})`,
+      color: params().color,
+      opacity: params().visible ? 1 : 0,
+    }}>
+      ...
+    </div>
+  );
+}
+```
+
+`createDialKit` returns an accessor — call `params()` to read the current values. All control types, config shapes, and panel features (presets, copy, folders) work identically to the React version.
 
 ---
 
