@@ -8,6 +8,7 @@ export type DialPosition = 'top-right' | 'top-left' | 'bottom-right' | 'bottom-l
 
 interface DialRootProps {
   position?: DialPosition;
+  defaultOpen?: boolean;
 }
 
 export function DialRoot(props: DialRootProps) {
@@ -29,7 +30,7 @@ export function DialRoot(props: DialRootProps) {
         <div class="dialkit-root">
           <div class="dialkit-panel" data-position={props.position ?? 'top-right'}>
             <For each={panels()}>
-              {(panel) => <Panel panel={panel} />}
+              {(panel) => <Panel panel={panel} defaultOpen={props.defaultOpen ?? true} />}
             </For>
           </div>
         </div>

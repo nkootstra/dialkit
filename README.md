@@ -236,16 +236,12 @@ shadow: {
 
 DialKit also supports dynamic config updates. If your config shape, defaults, options, or labels change over time, the panel updates while preserving current values where paths still exist.
 
-For dynamic configs, memoize the config object so updates run only when dependencies actually change:
+Dynamic configs work with both inline objects and memoized configs — no special consumer action needed:
 
 ```tsx
-import { useMemo } from 'react';
-
-const config = useMemo(() => ({
+const values = useDialKit('Controls', {
   style: { type: 'select', options: dynamicOptions },
-}), [dynamicOptions]);
-
-const values = useDialKit('Controls', config);
+});
 ```
 
 ---

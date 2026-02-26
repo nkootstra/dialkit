@@ -13,11 +13,12 @@ import { PresetManager } from './PresetManager';
 
 interface PanelProps {
   panel: PanelConfig;
+  defaultOpen?: boolean;
 }
 
 export function Panel(props: PanelProps) {
   const [copied, setCopied] = createSignal(false);
-  const [isPanelOpen, setIsPanelOpen] = createSignal(true);
+  const [isPanelOpen, setIsPanelOpen] = createSignal(props.defaultOpen ?? true);
   const [values, setValues] = createSignal<Record<string, DialValue>>(
     DialStore.getValues(props.panel.id)
   );
@@ -294,7 +295,7 @@ export function Panel(props: PanelProps) {
 
   return (
     <div class="dialkit-panel-wrapper">
-      <Folder title={props.panel.name} defaultOpen={true} isRoot={true} onOpenChange={setIsPanelOpen} toolbar={toolbar}>
+      <Folder title={props.panel.name} defaultOpen={props.defaultOpen ?? true} isRoot={true} onOpenChange={setIsPanelOpen} toolbar={toolbar}>
         {renderControls()}
       </Folder>
     </div>

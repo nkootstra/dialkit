@@ -13,26 +13,27 @@ export function useDialKit<T extends DialConfig>(
   const instanceId = useId();
   const panelId = `${name}-${instanceId}`;
   const configRef = useRef(config);
-  const nameRef = useRef(name);
+  const serializedConfig = JSON.stringify(config);
+  configRef.current = config;
   const onActionRef = useRef(options?.onAction);
   onActionRef.current = options?.onAction;
 
   // Register panel on mount
   useEffect(() => {
-    DialStore.registerPanel(panelId, nameRef.current, configRef.current);
+    DialStore.registerPanel(panelId, name, configRef.current);
     return () => DialStore.unregisterPanel(panelId);
-  }, [panelId]);
+  }, [panelId, name]);
 
-  // Update only when callers intentionally pass a new config reference (or rename panel).
+  // Update panel when config structure changes
+  const mountedRef = useRef(false);
   useEffect(() => {
-    if (configRef.current === config && nameRef.current === name) {
+    if (!mountedRef.current) {
+      mountedRef.current = true;
       return;
     }
-
-    DialStore.updatePanel(panelId, name, config);
-    configRef.current = config;
-    nameRef.current = name;
-  }, [panelId, name, config]);
+    DialStore.updatePanel(panelId, name, configRef.current);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [panelId, name, serializedConfig]);
 
   // Subscribe to action events
   useEffect(() => {
