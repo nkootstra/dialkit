@@ -118,10 +118,73 @@ class DialStoreClass {
     this.notifyGlobal();
   }
 
+  updatePanel(id: string, name: string, config: DialConfig): void {
+    const existing = this.panels.get(id);
+    if (!existing) {
+      this.registerPanel(id, name, config);
+      return;
+    }
+
+    const controls = this.parseConfig(config, '');
+    const controlsByPath = this.mapControlsByPath(controls);
+    const defaultValues = this.flattenValues(config, '');
+    const nextValues: Record<string, DialValue> = {};
+
+    for (const [path, defaultValue] of Object.entries(defaultValues)) {
+      nextValues[path] = this.normalizePreservedValue(
+        existing.values[path],
+        defaultValue,
+        controlsByPath.get(path)
+      );
+    }
+
+    // Set mode defaults for new transition controls first.
+    this.initTransitionModes(config, '', nextValues);
+
+    for (const [path, mode] of Object.entries(existing.values)) {
+      if (!path.endsWith('.__mode')) {
+        continue;
+      }
+
+      const transitionPath = path.slice(0, -'__mode'.length - 1);
+      const transitionControl = controlsByPath.get(transitionPath);
+      if (transitionControl?.type === 'transition') {
+        nextValues[path] = mode;
+      }
+    }
+
+    const nextPanel: PanelConfig = { id, name, controls, values: nextValues };
+    this.panels.set(id, nextPanel);
+    this.snapshots.set(id, { ...nextValues });
+
+    const previousBaseValues = this.baseValues.get(id) ?? {};
+    const nextBaseValues: Record<string, DialValue> = {};
+    for (const [path, defaultValue] of Object.entries(defaultValues)) {
+      nextBaseValues[path] = this.normalizePreservedValue(
+        previousBaseValues[path],
+        defaultValue,
+        controlsByPath.get(path)
+      );
+    }
+
+    for (const [path, value] of Object.entries(nextValues)) {
+      if (path.endsWith('.__mode')) {
+        nextBaseValues[path] = value;
+      }
+    }
+
+    this.baseValues.set(id, nextBaseValues);
+
+    this.notify(id);
+    this.notifyGlobal();
+  }
+
   unregisterPanel(id: string): void {
     this.panels.delete(id);
     this.listeners.delete(id);
     this.snapshots.delete(id);
+    this.actionListeners.delete(id);
+    this.baseValues.delete(id);
     this.notifyGlobal();
   }
 
@@ -502,6 +565,92 @@ class DialStoreClass {
     if (range <= 100) return 1;
     return 10;
   }
+
+  private normalizePreservedValue(
+    existingValue: DialValue | undefined,
+    defaultValue: DialValue,
+    control: ControlMeta | undefined
+  ): DialValue {
+    if (existingValue === undefined || !control) {
+      return defaultValue;
+    }
+
+    switch (control.type) {
+      case 'slider': {
+        if (typeof existingValue !== 'number' || typeof defaultValue !== 'number') {
+          return defaultValue;
+        }
+
+        const min = control.min ?? Number.NEGATIVE_INFINITY;
+        const max = control.max ?? Number.POSITIVE_INFINITY;
+        const clamped = Math.min(max, Math.max(min, existingValue));
+
+        if (typeof control.step !== 'number' || control.step <= 0) {
+          return clamped;
+        }
+
+        return this.roundToStep(clamped, min, max, control.step);
+      }
+      case 'toggle':
+        return typeof existingValue === 'boolean' ? existingValue : defaultValue;
+      case 'select': {
+        if (typeof existingValue !== 'string') {
+          return defaultValue;
+        }
+
+        const options = control.options ?? [];
+        const validValues = new Set(options.map((option) => (typeof option === 'string' ? option : option.value)));
+        return validValues.has(existingValue) ? existingValue : defaultValue;
+      }
+      case 'color':
+      case 'text':
+        return typeof existingValue === 'string' ? existingValue : defaultValue;
+      case 'transition':
+        if (this.isSpringConfig(defaultValue)) {
+          return this.isSpringConfig(existingValue) ? existingValue : defaultValue;
+        }
+        if (this.isEasingConfig(defaultValue)) {
+          return this.isEasingConfig(existingValue) ? existingValue : defaultValue;
+        }
+        return defaultValue;
+      case 'action':
+        return defaultValue;
+      default:
+        return defaultValue;
+    }
+  }
+
+  private roundToStep(value: number, min: number, max: number, step: number): number {
+    const snapped = min + Math.round((value - min) / step) * step;
+    const clamped = Math.min(max, Math.max(min, snapped));
+    const precision = this.stepPrecision(step);
+    return Number(clamped.toFixed(precision));
+  }
+
+  private stepPrecision(step: number): number {
+    const text = String(step);
+    const decimalIndex = text.indexOf('.');
+    return decimalIndex === -1 ? 0 : text.length - decimalIndex - 1;
+  }
+
+  private mapControlsByPath(controls: ControlMeta[]): Map<string, ControlMeta> {
+    const map = new Map<string, ControlMeta>();
+
+    const visit = (nodes: ControlMeta[]) => {
+      for (const node of nodes) {
+        if (node.type === 'folder' && node.children) {
+          visit(node.children);
+          continue;
+        }
+
+        map.set(node.path, node);
+      }
+    };
+
+    visit(controls);
+    return map;
+  }
+
 }
 
 // Singleton instance
